@@ -23,7 +23,7 @@ const validarCampos = (req,res,next)=>{
     if (!id || !nombre || !apellido || !fechaNacimiento) {
         res.status(403).send('falta un prametro');
     } else {
-        escritores.push(req.body)
+        //escritores.push(req.body)
         //escritores.push({id,nombre, apellido,fechaNacimiento})
         next();
     }
@@ -38,21 +38,34 @@ const validarID = (req,res,next)=>{
         res.status(403).send('ID incorrecto');
     }
 }
+const validarIDlibro = (req,res,next)=>{
+    let{id}=req.params;
+    let index = escritores.findIndex(el => el.id==id);
+    let { idLibro } = req.params;
+    const idExist = escritores[index].libro.filter(el=>el.idLibro==idLibro)
+    if (idExist.length>0) {
+        next();
+    }else{
+        res.status(403).send('IDlibro incorrecto');
+    }
+}
 const validarLibro = (req,res,next)=>{
-    const {id, titulo, descripcion, añoPublicacion} = req.body;
-    const libroExist = escritores.libro.filter(el=>el.id == id || el.titulo == titulo || el.descripcion == descripcion || el.añoPublicacion == añoPublicacion)
-    if (libroExist.length>0) {
+    let{id}=req.params;
+    let index = escritores.findIndex(el => el.id==id);
+    const {idLibro, titulo} = req.body;
+    const libroExist = escritores[index].libro.filter(el=>el.idLibro == idLibro || el.titulo == titulo)
+    if (!libroExist.length>0) {
         next();
     } else {
         res.status(403).send('libro ya publicado');
     }
 }
 const validarCamposLibro=(req,res,next)=>{
-    const {id, titulo, descripcion, añoPublicacion} = req.body;
-    if (!id || !titulo || !descripcion || !añoPublicacion) {
+    const {idLibro, titulo, descripcion, añoPublicacion} = req.body;
+    if (!idLibro || !titulo || !descripcion || !añoPublicacion) {
         res.status(403).send('falta un prametro');
     } else {
-        escritores.libro.push(req.body)
+        
         //escritores.push({id,nombre, apellido,fechaNacimiento})
         next();
     }
@@ -71,6 +84,7 @@ app.get('/autores', (req, res) => {
 })
 
 app.post('/autores', validarAutor, validarCampos,  (req,res)=>{
+    escritores.push(req.body)
     //let {id, nombre...}
     respuesta = {
         error: false,
@@ -108,11 +122,12 @@ app.delete('/autores/:id',validarID,(req,res)=>{
 app.put('/autores/:id',validarID,validarCampos,(req,res)=>{
     let{id}=req.params;
     let index = escritores.findIndex(el => el.id==id);
+    escritores.splice(index,1,req.body)
     respuesta = {
         error: false,
         codigo: 200,
         mensaje: 'autor modificado',
-        respuesta: escritores[index]
+        respuesta: req.body
     };
     res.status(200).send(respuesta); 
 })
@@ -130,6 +145,9 @@ app.get('/autores/:id/libros',validarID,(req,res)=>{
     res.status(200).send(respuesta); 
 })
 app.post('/autores/:id/libros',validarID,validarLibro,validarCamposLibro,(req,res)=>{
+    let{id}=req.params;
+    let index = escritores.findIndex(el => el.id==id);
+    escritores[index].libro.push(req.body)
     respuesta = {
         error: false,
         codigo: 200,
@@ -137,6 +155,49 @@ app.post('/autores/:id/libros',validarID,validarLibro,validarCamposLibro,(req,re
         respuesta: req.body
     };
     res.status(200).send(respuesta);  
+})
+//GET-PUT-DELETE-----/AUTORES/:ID/LIBROS/:IDLIBRO--------------
+app.get('/autores/:id/libros/:idLibro',validarID,validarIDlibro,(req,res)=>{
+    let{id}=req.params;
+    let index = escritores.findIndex(el => el.id==id);
+    let{idLibro}=req.params;
+    let indexLibro = escritores[index].libro.findIndex(el => el.idLibro==idLibro);
+    respuesta = {
+        error: false,
+        codigo: 200,
+        mensaje: `Libro de ${escritores[index].nombre} ${escritores[index].apellido}`,
+        respuesta: escritores[index].libro[indexLibro]
+    };
+    res.status(200).send(respuesta); 
+})
+app.put('/autores/:id/libros/:idLibro',validarID,validarIDlibro,validarCamposLibro,(req,res)=>{
+    let{id}=req.params;
+    let index = escritores.findIndex(el => el.id==id);
+    let{idLibro}=req.params;
+    let indexLibro = escritores[index].libro.findIndex(el => el.idLibro==idLibro);
+    //-----modificando un array-----
+    escritores[index].libro.splice(indexLibro,1,req.body)
+    respuesta = {
+        error: false,
+        codigo: 200,
+        mensaje: `Modificacion del libro de ${escritores[index].nombre} ${escritores[index].apellido}`,
+        respuesta: req.body
+    };
+    res.status(200).send(respuesta); 
+})
+app.delete('/autores/:id/libros/:idLibro',validarID,validarIDlibro,(req,res)=>{
+    let{id}=req.params;
+    let index = escritores.findIndex(el => el.id==id);
+    let{idLibro}=req.params;
+    let indexLibro = escritores[index].libro.findIndex(el => el.idLibro==idLibro);
+    escritores[index].libro.splice(indexLibro,1);
+    respuesta = {
+        error: false,
+        codigo: 200,
+        mensaje: 'Libro eliminado',
+        respuesta: escritores[index].libro[indexLibro]
+    };
+    res.status(200).send(respuesta); 
 })
 //--------------
 /* let{id}=req.params;

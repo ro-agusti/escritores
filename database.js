@@ -6,12 +6,12 @@ let escritores = [{
     fechaNacimiento: '14/04/1955',
     libro: [
         {
-            id: 1,
+            idLibro: 1,
             titulo: 'bajo las estrellas',
             descripcion: 'lorem',
             añoPublicacion: 1989
         }, {
-            id: 2,
+            idLibro: 2,
             titulo: 'juicio final',
             descripcio: 'loremjsfj',
             añoPublicacion: 1997
@@ -24,12 +24,12 @@ let escritores = [{
     fechaNacimiento: '14/08/1970',
     libro: [
         {
-            id: 1,
+            idLibro: 1,
             titulo: 'Harry potter 1',
             descripcion: 'lorem',
             añoPublicacion: 2001
         }, {
-            id: 2,
+            idLibro: 2,
             titulo: 'harry potter 2',
             descripcio: 'loremjsfj',
             añoPublicacion: 2003
